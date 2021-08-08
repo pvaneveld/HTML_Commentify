@@ -2,7 +2,7 @@
 
 ### :link: Where
 
-Project can be found [here](https://priceless-mirzakhani-445b23.netlify.app/)
+Project can be found [here](https://compassionate-chandrasekhar-0fbf81.netlify.app/)
 
 ### :mag: What?
 
