@@ -24,7 +24,6 @@
     commentCount = 0;
     dragOver = false;
     fileArray = getFileArray(e);
-
     if (fileArray.length) {
       fileReader.readAsText(fileArray[0].file);
     }
@@ -86,11 +85,53 @@
    * @description place comment tags in html file
    */
   const commentify = (htmlString: string) => {
+    // parse as HTML
     const document = domParser.parseFromString(htmlString, "text/html");
+
+    // remove and insert comments
     removeComments(document);
     document.querySelectorAll("*").forEach(insertComments);
 
-    download(fileName, document.documentElement.innerHTML);
+    // remove unwanted casing and characters introduced by the DOM-parser
+    const sanatizedString = sanatizeString(document.body.innerHTML, htmlString);
+
+    // download the file sanatized file
+    download(fileName, sanatizedString);
+  };
+
+  /**
+   * @description sanatize unwanted properties added by parsing
+   */
+  const sanatizeString = (
+    parsedHtmlAsString: string,
+    orginalHtmlString: string
+  ) => {
+    let replacedString = parsedHtmlAsString;
+
+    // get camel cased words form original string and add them to the parsed document
+    getCamelAndPascalCasedWords(orginalHtmlString).forEach((tag) => {
+      const regex = new RegExp(tag, "gi");
+      replacedString = replacedString.replaceAll(regex, tag);
+    });
+
+    // replace amperstands and empty equal to signs
+    replacedString = replacedString
+      .replaceAll("&amp;", "&")
+      .replaceAll('=""', "");
+
+    // return the sanatized results
+    return replacedString;
+  };
+
+  /**
+   * @description match all camel cased and pascal cased words
+   */
+  const getCamelAndPascalCasedWords = (orginalHtmlString: string) => {
+    const camelCasingRegex = new RegExp(/([a-z]|[A-Z])([a-z]+[A-Z]\w+)/, "g");
+
+    return Array.from(new Set(orginalHtmlString.match(camelCasingRegex))).sort(
+      (a, b) => a.length - b.length
+    );
   };
 
   /**
